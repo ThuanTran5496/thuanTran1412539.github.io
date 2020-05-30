@@ -4,14 +4,41 @@
     <title>Homework</title>
   </head>
   <body>
-    <div class="container">
+    <div class="container" style="font-family: MONOSPACE;">
       <div class="blurb">
         <h1>Đồ hoạ ứng dụng - Bài tập về nhà</h1>
         <div>
-          <canvas></canvas>
-          <canvas></canvas>
+          <canvas id="my-video"></canvas>
+          <canvas id="canvas-sobel"></canvas>
         </div>
       </div>
     </div>
+    <script>
+      var canvas = document.getElementById('my-video');
+      var context = canvas.getContext('2d');
+
+      var image = new Image();
+      image.src = 'cameraman.tif';
+      image.onload = drawImage;
+
+      function drawImage(event) {
+        var width = image.width;
+        var height = image.height;
+
+        canvas.width = width;
+        canvas.height = height;
+
+        context.drawImage(image, 0, 0);
+        var imageData = context.getImageData(0, 0, width, height);
+
+        // Sobel constructor returns an Uint8ClampedArray with sobel data
+        var sobelData = Sobel(imageData);
+
+        // [sobelData].toImageData() returns a new ImageData object
+        var sobelImageData = sobelData.toImageData();
+        context.putImageData(sobelImageData, 0, 0);
+      }
+    </script>
+    <script src="sobel.js"></script>
   </body>
 </html>
