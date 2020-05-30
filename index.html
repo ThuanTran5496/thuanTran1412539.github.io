@@ -8,28 +8,44 @@
       <div class="blurb">
         <h1>Đồ hoạ ứng dụng - Bài tập về nhà</h1>
         <div>
-          <canvas id="my-video"></canvas>
+          <canvas id="img" src="fruits.png"></canvas>
           <canvas id="canvas-sobel"></canvas>
         </div>
       </div>
     </div>
     <script>
-      var canvas = document.getElementById('my-video');
-      var context = canvas.getContext('2d');
+      var originalImg = document.getElementById('img');
+      var originalContext = originalImg.getContext('2d');
+      var img1 = new Image();
+      img1.src = 'fruits.png';
+      img1.crossOrigin = 'Anonymous';
+      img1.onload = drawImage;
 
+      var canvas = document.getElementById('canvas-sobel');
+      var context = canvas.getContext('2d');
       var image = new Image();
-      image.src = 'cameraman.tif';
-      image.onload = drawImage;
+      image.src = 'fruits.png';
+      image.crossOrigin = 'Anonymous';
+      image.onload = drawSobelImage;
 
       function drawImage(event) {
-        var width = image.width;
-        var height = image.height;
+        let width = img1.width;
+        let height = img1.height;
+
+        originalImg.width = width;
+        originalImg.height = height;
+        originalContext.drawImage(img1, 0, 0);
+      }
+
+      function drawSobelImage(event) {
+        let width = image.width;
+        let height = image.height;
 
         canvas.width = width;
         canvas.height = height;
 
         context.drawImage(image, 0, 0);
-        var imageData = context.getImageData(0, 0, width, height);
+        let imageData = context.getImageData(0, 0, width, height);
 
         // Sobel constructor returns an Uint8ClampedArray with sobel data
         var sobelData = Sobel(imageData);
