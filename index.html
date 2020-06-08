@@ -5,26 +5,73 @@
   </head>
   <body>
     <div class="container" style="font-family: MONOSPACE;">
-      <div class="blurb">
+      <div class="main-content" style="padding: 15px;">
         <h1>Đồ hoạ ứng dụng - Bài tập về nhà</h1>
+        <hr />
         <div>
-          <canvas id="img" src="fruits.png"></canvas>
-          <canvas id="canvas-sobel"></canvas>
+          <div style="padding: 10px;">
+            <h2>Test on video - please play video to view result</h2>
+            <div
+              style="display: flex; justify-content: space-around; width: 50%; margin-bottom: 10px;"
+            >
+              <video id="video" src="sample.mp4" controls="true" crossorigin="anonymous"></video>
+              <canvas id="c1"></canvas>
+            </div>
+          </div>
+          <hr />
+          <div style="padding: 10px;">
+            <h2>Test on image</h2>
+            <div style="display: flex; justify-content: space-around;">
+              <canvas id="img"></canvas>
+              <canvas id="canvas-sobel"></canvas>
+            </div>
+          </div>
         </div>
       </div>
     </div>
     <script>
+      var video = document.getElementById('video');
+      var c1 = document.getElementById('c1');
+      var width, height;
+      var ctx1 = c1.getContext('2d');
+      video.addEventListener(
+        'play',
+        () => {
+          width = video.videoWidth;
+          height = video.videoHeight;
+          videoHandler();
+        },
+        false
+      );
+      function videoHandler() {
+        if (video.paused || video.ended) {
+          return;
+        }
+        computeFrame();
+        setTimeout(() => {
+          videoHandler();
+        }, 0);
+      }
+
+      function computeFrame() {
+        ctx1.drawImage(video, 0, 0, width, height);
+        let frame = ctx1.getImageData(0, 0, width, height);
+        var sobelData = Sobel(frame).toImageData();
+        ctx1.putImageData(sobelData, 0, 0);
+        return;
+      }
+
       var originalImg = document.getElementById('img');
       var originalContext = originalImg.getContext('2d');
       var img1 = new Image();
-      img1.src = 'fruits.png';
+      img1.src = 'fruits.jpg';
       img1.crossOrigin = 'Anonymous';
       img1.onload = drawImage;
 
       var canvas = document.getElementById('canvas-sobel');
       var context = canvas.getContext('2d');
       var image = new Image();
-      image.src = 'fruits.png';
+      image.src = 'fruits.jpg';
       image.crossOrigin = 'Anonymous';
       image.onload = drawSobelImage;
 
@@ -46,11 +93,7 @@
 
         context.drawImage(image, 0, 0);
         let imageData = context.getImageData(0, 0, width, height);
-
-        // Sobel constructor returns an Uint8ClampedArray with sobel data
         var sobelData = Sobel(imageData);
-
-        // [sobelData].toImageData() returns a new ImageData object
         var sobelImageData = sobelData.toImageData();
         context.putImageData(sobelImageData, 0, 0);
       }

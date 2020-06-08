@@ -1,76 +1,65 @@
+// reference code from sobel algorithm https://lab.miguelmota.com/sobel/example/
+
 (function (root) {
-  'use strict';
-
   function Sobel(imageData) {
-    if (!(this instanceof Sobel)) {
-      return new Sobel(imageData);
-    }
-
     var width = imageData.width;
     var height = imageData.height;
-
-    var kernelX = [
+    var x, y;
+    var convX = [
       [-1, 0, 1],
       [-2, 0, 2],
       [-1, 0, 1]
     ];
-
-    var kernelY = [
+    var convY = [
       [-1, -2, -1],
       [0, 0, 0],
       [1, 2, 1]
     ];
-
     var sobelData = [];
-    var grayscaleData = [];
+    var tempData = [];
 
-    function bindPixelAt(data) {
+    function bindPixel(data) {
       return function (x, y, i) {
         i = i || 0;
         return data[(width * y + x) * 4 + i];
       };
     }
-
-    var data = imageData.data;
-    var pixelAt = bindPixelAt(data);
-    var x, y;
+    var at = bindPixel(imageData.data);
 
     for (y = 0; y < height; y++) {
       for (x = 0; x < width; x++) {
-        var r = pixelAt(x, y, 0);
-        var g = pixelAt(x, y, 1);
-        var b = pixelAt(x, y, 2);
-
-        var avg = (r + g + b) / 3;
-        grayscaleData.push(avg, avg, avg, 255);
+        var r = at(x, y, 0);
+        var g = at(x, y, 1);
+        var b = at(x, y, 2);
+        tempData.push((r + g + b) / 3, (r + g + b) / 3, (r + g + b) / 3, 255);
       }
     }
 
-    pixelAt = bindPixelAt(grayscaleData);
+    at = bindPixel(tempData);
 
     for (y = 0; y < height; y++) {
       for (x = 0; x < width; x++) {
         var pixelX =
-          kernelX[0][0] * pixelAt(x - 1, y - 1) +
-          kernelX[0][1] * pixelAt(x, y - 1) +
-          kernelX[0][2] * pixelAt(x + 1, y - 1) +
-          kernelX[1][0] * pixelAt(x - 1, y) +
-          kernelX[1][1] * pixelAt(x, y) +
-          kernelX[1][2] * pixelAt(x + 1, y) +
-          kernelX[2][0] * pixelAt(x - 1, y + 1) +
-          kernelX[2][1] * pixelAt(x, y + 1) +
-          kernelX[2][2] * pixelAt(x + 1, y + 1);
+          convX[0][0] * at(x - 1, y - 1) +
+          convX[0][1] * at(x, y - 1) +
+          convX[0][2] * at(x + 1, y - 1) +
+          convX[1][0] * at(x - 1, y) +
+          convX[1][1] * at(x, y) +
+          convX[1][2] * at(x + 1, y) +
+          convX[2][0] * at(x - 1, y + 1) +
+          convX[2][1] * at(x, y + 1) +
+          convX[2][2] * at(x + 1, y + 1);
 
         var pixelY =
-          kernelY[0][0] * pixelAt(x - 1, y - 1) +
-          kernelY[0][1] * pixelAt(x, y - 1) +
-          kernelY[0][2] * pixelAt(x + 1, y - 1) +
-          kernelY[1][0] * pixelAt(x - 1, y) +
-          kernelY[1][1] * pixelAt(x, y) +
-          kernelY[1][2] * pixelAt(x + 1, y) +
-          kernelY[2][0] * pixelAt(x - 1, y + 1) +
-          kernelY[2][1] * pixelAt(x, y + 1) +
-          kernelY[2][2] * pixelAt(x + 1, y + 1);
+          convY[0][0] * at(x - 1, y - 1) +
+          convY[0][1] * at(x, y - 1) +
+          convY[0][2] * at(x + 1, y - 1) +
+          convY[1][0] * at(x - 1, y) +
+          convY[1][1] * at(x, y) +
+          convY[1][2] * at(x + 1, y) +
+          convY[2][0] * at(x - 1, y + 1) +
+          convY[2][1] * at(x, y + 1) +
+          convY[2][2] * at(x + 1, y + 1);
 
         var magnitude = Math.sqrt(pixelX * pixelX + pixelY * pixelY) >>> 0;
 
@@ -107,21 +96,13 @@
           imageData.data.set(data);
           return imageData;
         } else {
-          return new FakeImageData(data, width, height);
+          return { data, width, height };
         }
       } else {
-        return new FakeImageData(data, width, height);
+        return { data, width, height };
       }
     }
   };
-
-  function FakeImageData(data, width, height) {
-    return {
-      width: width,
-      height: height,
-      data: data
-    };
-  }
 
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
